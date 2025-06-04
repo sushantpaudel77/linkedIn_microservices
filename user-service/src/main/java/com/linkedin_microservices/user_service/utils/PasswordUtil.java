@@ -1,10 +1,11 @@
 package com.linkedin_microservices.user_service.utils;
 
-import lombok.NoArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
 
-@NoArgsConstructor
 public class PasswordUtil {
+
+    private PasswordUtil() {
+    }
 
     public static String hashPassword(String plainTextPassword) {
         return BCrypt.hashpw(plainTextPassword, BCrypt.gensalt());
