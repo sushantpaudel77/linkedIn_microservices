@@ -1,0 +1,46 @@
+package com.linkedin_microservices.posts_service.service;
+
+import com.linkedin_microservices.posts_service.dto.PostCreateRequestDto;
+import com.linkedin_microservices.posts_service.dto.PostDto;
+import com.linkedin_microservices.posts_service.entity.Post;
+import com.linkedin_microservices.posts_service.exception.ResourceNotFoundException;
+import com.linkedin_microservices.posts_service.repository.PostRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class PostServiceImpl implements PostService {
+
+    private final PostRepository postRepository;
+    private final ModelMapper modelMapper;
+
+    @Override
+    public PostDto createPost(PostCreateRequestDto createRequestDto, Long userId) {
+        Post newPost = modelMapper.map(createRequestDto, Post.class);
+        newPost.setUserId(userId);
+
+        Post savedPost = postRepository.save(newPost);
+        return modelMapper.map(savedPost, PostDto.class);
+    }
+
+    @Override
+    public PostDto getPostById(Long postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() ->
+                new ResourceNotFoundException("Post not found with ID: " + postId));
+        return modelMapper.map(post, PostDto.class);
+    }
+
+    @Override
+    public List<PostDto> getAllPostsOfUser(Long userId) {
+        List<Post> userPosts = postRepository.findByUserId(userId);
+        return userPosts.stream()
+                .map(element -> modelMapper.map(element, PostDto.class))
+                .toList();
+    }
+}
