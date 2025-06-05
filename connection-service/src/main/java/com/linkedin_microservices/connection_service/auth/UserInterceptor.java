@@ -1,4 +1,4 @@
-package com.linkedin_microservices.posts_service.auth;
+package com.linkedin_microservices.connection_service.auth;
 
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,7 +8,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 @Component
 public class UserInterceptor implements HandlerInterceptor {
-
     @Override
     public void afterCompletion(@Nonnull HttpServletRequest request,
                                 @Nonnull HttpServletResponse response,

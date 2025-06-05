@@ -11,6 +11,7 @@ import com.linkedin_microservices.posts_service.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +25,11 @@ public class PostServiceImpl implements PostService {
     private final ModelMapper modelMapper;
     private final ConnectionsClient connectionsClient;
 
+    private final KafkaTemplate<> kafkaTemplate;
+
     @Override
-    public PostDto createPost(PostCreateRequestDto createRequestDto, Long userId) {
+    public PostDto createPost(PostCreateRequestDto createRequestDto) {
+        Long userId = UserContextHolder.getCurrentUserId();
         Post newPost = modelMapper.map(createRequestDto, Post.class);
         newPost.setUserId(userId);
 
@@ -39,7 +43,7 @@ public class PostServiceImpl implements PostService {
 
         Long userId = UserContextHolder.getCurrentUserId();
 
-        List<PersonDto> firstConnections = connectionsClient.getFirstConnections(userId);
+        List<PersonDto> firstConnections = connectionsClient.getFirstConnections();
 
         // TODO send notification to all connections
 

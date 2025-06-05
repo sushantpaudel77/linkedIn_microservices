@@ -1,5 +1,6 @@
 package com.linkedin_microservices.connection_service.service;
 
+import com.linkedin_microservices.connection_service.auth.UserContextHolder;
 import com.linkedin_microservices.connection_service.entity.Person;
 import com.linkedin_microservices.connection_service.repository.PersonRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +19,9 @@ public class ConnectionsServiceImpl implements ConnectionsService{
 
     @Transactional
     @Override
-    public List<Person> getFirstDegreeConnections(Long userId) {
-        log.info("Getting fist degree connections for user with ID: {}", + userId);
+    public List<Person> getFirstDegreeConnections() {
+        Long userId = UserContextHolder.getCurrentUserId();
+        log.info("Getting fist degree connections for user with ID: {}", userId);
         return personRepository.getFirstDegreeConnections(userId);
     }
 }
