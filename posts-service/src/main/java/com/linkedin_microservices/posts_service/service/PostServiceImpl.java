@@ -1,5 +1,6 @@
 package com.linkedin_microservices.posts_service.service;
 
+import com.linkedin_microservices.posts_service.auth.UserContextHolder;
 import com.linkedin_microservices.posts_service.dto.PostCreateRequestDto;
 import com.linkedin_microservices.posts_service.dto.PostDto;
 import com.linkedin_microservices.posts_service.entity.Post;
@@ -31,6 +32,10 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDto getPostById(Long postId) {
+        log.debug("Retrieving post with ID: {}", postId);
+
+        Long userId = UserContextHolder.getCurrentUserId();
+
         Post post = postRepository.findById(postId).orElseThrow(() ->
                 new ResourceNotFoundException("Post not found with ID: " + postId));
         return modelMapper.map(post, PostDto.class);

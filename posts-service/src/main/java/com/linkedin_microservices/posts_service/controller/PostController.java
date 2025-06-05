@@ -1,8 +1,10 @@
 package com.linkedin_microservices.posts_service.controller;
 
+import com.linkedin_microservices.posts_service.auth.UserContextHolder;
 import com.linkedin_microservices.posts_service.dto.PostCreateRequestDto;
 import com.linkedin_microservices.posts_service.dto.PostDto;
 import com.linkedin_microservices.posts_service.service.PostService;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
