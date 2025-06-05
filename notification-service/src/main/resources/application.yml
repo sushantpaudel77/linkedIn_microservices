@@ -1,7 +1,10 @@
 spring:
   kafka:
     bootstrap-servers: localhost:9092
-    producer:
+    consumer:
+      group-id: ${spring.application.name}
       key-serializer: org.apache.kafka.common.serialization.LongSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-
+      properties:
+        spring.json:
+          trusted.packages: com.linkedin_microservices.*

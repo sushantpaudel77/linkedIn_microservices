@@ -6,6 +6,7 @@ import com.linkedin_microservices.posts_service.dto.PersonDto;
 import com.linkedin_microservices.posts_service.dto.PostCreateRequestDto;
 import com.linkedin_microservices.posts_service.dto.PostDto;
 import com.linkedin_microservices.posts_service.entity.Post;
+import com.linkedin_microservices.posts_service.events.PostCreatedEvent;
 import com.linkedin_microservices.posts_service.exception.ResourceNotFoundException;
 import com.linkedin_microservices.posts_service.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class PostServiceImpl implements PostService {
     private final ModelMapper modelMapper;
     private final ConnectionsClient connectionsClient;
 
-    private final KafkaTemplate<> kafkaTemplate;
+    private final KafkaTemplate<Long, PostCreatedEvent> kafkaTemplate;
 
     @Override
     public PostDto createPost(PostCreateRequestDto createRequestDto) {
@@ -34,6 +35,15 @@ public class PostServiceImpl implements PostService {
         newPost.setUserId(userId);
 
         Post savedPost = postRepository.save(newPost);
+
+        PostCreatedEvent postCreatedEvent = PostCreatedEvent.builder()
+                .createdId(userId)
+                .postId(savedPost.getId())
+                .content(savedPost.getContent())
+                .build();
+
+        kafkaTemplate.send("post-created-topic", postCreatedEvent);
+
         return modelMapper.map(savedPost, PostDto.class);
     }
 

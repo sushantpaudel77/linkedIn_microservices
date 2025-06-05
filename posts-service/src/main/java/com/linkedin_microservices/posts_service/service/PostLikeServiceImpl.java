@@ -1,6 +1,9 @@
 package com.linkedin_microservices.posts_service.service;
 
+import com.linkedin_microservices.posts_service.auth.UserContextHolder;
+import com.linkedin_microservices.posts_service.entity.Post;
 import com.linkedin_microservices.posts_service.entity.PostLike;
+import com.linkedin_microservices.posts_service.events.PostLikedEvent;
 import com.linkedin_microservices.posts_service.exception.BadRequestException;
 import com.linkedin_microservices.posts_service.exception.ResourceNotFoundException;
 import com.linkedin_microservices.posts_service.repository.PostLikeRepository;
@@ -8,6 +11,7 @@ import com.linkedin_microservices.posts_service.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,27 +23,50 @@ public class PostLikeServiceImpl implements PostLikeService {
     private final ModelMapper modelMapper;
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
+    private final KafkaTemplate<Long, PostLikedEvent> kafkaTemplate;
 
-    public void likePost(Long postId, Long userId) {
-        log.info("Attempting to like the post with ID: {}", postId);
-        boolean exists = postRepository.existsById(postId);
-        if (!exists) throw new ResourceNotFoundException("Post not found with ID: " + postId);
+    public void likePost(Long postId) {
+        Long userId = UserContextHolder.getCurrentUserId();
+        log.info("User [{}] is attempting to like post [{}]", userId, postId);
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> {
+                    log.warn("Post [{}] not found while user [{}] tried to like", postId, userId);
+                    return new ResourceNotFoundException("Post not found with ID: " + postId);
+                });
 
         boolean alreadyLiked = postLikeRepository.existsByUserIdAndPostId(userId, postId);
-        if (alreadyLiked) throw new BadRequestException("Cannot like the same post again.");
+        if (alreadyLiked) {
+            log.warn("User [{}] already liked post [{}]. Aborting like operation.", userId, postId);
+            throw new BadRequestException("Cannot like the same post again.");
+        }
 
         PostLike postLike = new PostLike();
         postLike.setPostId(postId);
         postLike.setUserId(userId);
 
         postLikeRepository.save(postLike);
-        log.info("Post with ID: {} liked successfully", postId);
+        log.info("User [{}] successfully liked post [{}]", userId, postId);
+
+        PostLikedEvent postLikedEvent = PostLikedEvent.builder()
+                .postId(postId)
+                .likedByUserId(userId)
+                .creatorId(post.getUserId())
+                .build();
+
+        log.debug("Publishing post-liked event for post [{}], liked by [{}], creator [{}]",
+                postId, userId, post.getUserId());
+
+        kafkaTemplate.send("post-liked-topic", postId, postLikedEvent);
+        log.info("PostLikedTopic published to topic 'post-liked-topic' for post [{}]", postId);
     }
+
 
     @Transactional
     @Override
-    public void unlikePost(Long postId, long userId) {
+    public void unlikePost(Long postId) {
         log.info("Attempting to unlike the post with ID: {}", postId);
+        Long userId = UserContextHolder.getCurrentUserId();
         boolean exists = postRepository.existsById(postId);
         if (!exists) throw new ResourceNotFoundException("Post not found with ID: " + postId);
 
