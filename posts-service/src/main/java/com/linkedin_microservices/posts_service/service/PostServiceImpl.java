@@ -1,6 +1,8 @@
 package com.linkedin_microservices.posts_service.service;
 
 import com.linkedin_microservices.posts_service.auth.UserContextHolder;
+import com.linkedin_microservices.posts_service.clients.ConnectionsClient;
+import com.linkedin_microservices.posts_service.dto.PersonDto;
 import com.linkedin_microservices.posts_service.dto.PostCreateRequestDto;
 import com.linkedin_microservices.posts_service.dto.PostDto;
 import com.linkedin_microservices.posts_service.entity.Post;
@@ -20,6 +22,7 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final ModelMapper modelMapper;
+    private final ConnectionsClient connectionsClient;
 
     @Override
     public PostDto createPost(PostCreateRequestDto createRequestDto, Long userId) {
@@ -35,6 +38,10 @@ public class PostServiceImpl implements PostService {
         log.debug("Retrieving post with ID: {}", postId);
 
         Long userId = UserContextHolder.getCurrentUserId();
+
+        List<PersonDto> firstConnections = connectionsClient.getFirstConnections(userId);
+
+        // TODO send notification to all connections
 
         Post post = postRepository.findById(postId).orElseThrow(() ->
                 new ResourceNotFoundException("Post not found with ID: " + postId));
