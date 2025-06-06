@@ -35,31 +35,43 @@ public class ConnectionsServiceImpl implements ConnectionsService {
         Long senderId = UserContextHolder.getCurrentUserId();
         log.info("Trying to send connection request, sender: {}, receiver: {}", senderId, receiverId);
 
-        if (senderId.equals(receiverId)) throw new IllegalStateException("Both sender and receiver are the same");
+        try {
+            if (senderId.equals(receiverId)) {
+                throw new IllegalStateException("Both sender and receiver are the same");
+            }
 
-        boolean alreadySendRequest = personRepository.connectionRequestExist(senderId, receiverId);
-        if (alreadySendRequest) {
-            throw new IllegalStateException("Connection request already exists");
+            boolean alreadySendRequest = personRepository.connectionRequestExist(senderId, receiverId);
+            if (alreadySendRequest) {
+                throw new IllegalStateException("Connection request already exists");
+            }
+
+            boolean alreadyConnected = personRepository.alreadyConnected(senderId, receiverId);
+            if (alreadyConnected) {
+                throw new IllegalStateException("Already connected users, cannot add new request");
+            }
+
+            personRepository.addConnectionRequest(senderId, receiverId);
+            log.info("Successfully sent the connection request from {} to {}", senderId, receiverId);
+
+            SendConnectionRequestEvent sendConnectionRequestEvent = SendConnectionRequestEvent.builder()
+                    .senderId(senderId)
+                    .receiverId(receiverId)
+                    .build();
+
+            sendConnectionRequestEventKafkaTemplate.send(
+                    "send-connection-request-topic", sendConnectionRequestEvent);
+
+            return true;
+
+        } catch (IllegalStateException e) {
+            log.warn("Connection request failed: {}", e.getMessage());
+            throw e; // rethrow so upstream can handle this
+        } catch (Exception e) {
+            log.error("Unexpected error while sending connection request from {} to {}: {}", senderId, receiverId, e.getMessage(), e);
+            throw new IllegalStateException("Failed to send connection request due to server error");
         }
-
-        boolean alreadyConnected = personRepository.alreadyConnected(senderId, receiverId);
-        if (alreadyConnected) {
-            throw new IllegalStateException("Already connected users, cannot add new request");
-        }
-
-        log.info("Successfully sent the connection request");
-        personRepository.addConnectionRequest(senderId, receiverId);
-
-        SendConnectionRequestEvent sendConnectionRequestEvent = SendConnectionRequestEvent.builder()
-                .senderId(senderId)
-                .receiverId(receiverId)
-                .build();
-
-        sendConnectionRequestEventKafkaTemplate.send(
-                "send-connection-request-topic", sendConnectionRequestEvent);
-
-        return true;
     }
+
 
     @Override
     public Boolean acceptConnectionRequest(Long senderId) {
