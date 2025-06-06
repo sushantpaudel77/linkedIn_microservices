@@ -1,10 +1,12 @@
 spring:
+  application:
+    name: notification_service
+
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
       group-id: ${spring.application.name}
-      key-serializer: org.apache.kafka.common.serialization.LongSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
-        spring.json:
-          trusted.packages: com.linkedin_microservices.*
+        spring.json.trusted.packages: com.linkedin_microservices.*

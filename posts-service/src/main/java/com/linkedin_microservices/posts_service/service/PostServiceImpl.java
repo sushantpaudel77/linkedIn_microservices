@@ -2,11 +2,10 @@ package com.linkedin_microservices.posts_service.service;
 
 import com.linkedin_microservices.posts_service.auth.UserContextHolder;
 import com.linkedin_microservices.posts_service.clients.ConnectionsClient;
-import com.linkedin_microservices.posts_service.dto.PersonDto;
 import com.linkedin_microservices.posts_service.dto.PostCreateRequestDto;
 import com.linkedin_microservices.posts_service.dto.PostDto;
 import com.linkedin_microservices.posts_service.entity.Post;
-import com.linkedin_microservices.posts_service.events.PostCreatedEvent;
+import com.linkedin_microservices.posts.service.events.PostCreatedEvent;
 import com.linkedin_microservices.posts_service.exception.ResourceNotFoundException;
 import com.linkedin_microservices.posts_service.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,7 @@ public class PostServiceImpl implements PostService {
         Post savedPost = postRepository.save(newPost);
 
         PostCreatedEvent postCreatedEvent = PostCreatedEvent.builder()
-                .createdId(userId)
+                .creatorId(userId)
                 .postId(savedPost.getId())
                 .content(savedPost.getContent())
                 .build();
@@ -50,12 +49,6 @@ public class PostServiceImpl implements PostService {
     @Override
     public PostDto getPostById(Long postId) {
         log.debug("Retrieving post with ID: {}", postId);
-
-        Long userId = UserContextHolder.getCurrentUserId();
-
-        List<PersonDto> firstConnections = connectionsClient.getFirstConnections();
-
-        // TODO send notification to all connections
 
         Post post = postRepository.findById(postId).orElseThrow(() ->
                 new ResourceNotFoundException("Post not found with ID: " + postId));

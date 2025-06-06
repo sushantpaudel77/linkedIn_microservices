@@ -3,7 +3,7 @@ package com.linkedin_microservices.posts_service.service;
 import com.linkedin_microservices.posts_service.auth.UserContextHolder;
 import com.linkedin_microservices.posts_service.entity.Post;
 import com.linkedin_microservices.posts_service.entity.PostLike;
-import com.linkedin_microservices.posts_service.events.PostLikedEvent;
+import com.linkedin_microservices.posts.service.events.PostLikedEvent;
 import com.linkedin_microservices.posts_service.exception.BadRequestException;
 import com.linkedin_microservices.posts_service.exception.ResourceNotFoundException;
 import com.linkedin_microservices.posts_service.repository.PostLikeRepository;
@@ -31,7 +31,6 @@ public class PostLikeServiceImpl implements PostLikeService {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> {
-                    log.warn("Post [{}] not found while user [{}] tried to like", postId, userId);
                     return new ResourceNotFoundException("Post not found with ID: " + postId);
                 });
 
@@ -53,9 +52,6 @@ public class PostLikeServiceImpl implements PostLikeService {
                 .likedByUserId(userId)
                 .creatorId(post.getUserId())
                 .build();
-
-        log.debug("Publishing post-liked event for post [{}], liked by [{}], creator [{}]",
-                postId, userId, post.getUserId());
 
         kafkaTemplate.send("post-liked-topic", postId, postLikedEvent);
         log.info("PostLikedTopic published to topic 'post-liked-topic' for post [{}]", postId);

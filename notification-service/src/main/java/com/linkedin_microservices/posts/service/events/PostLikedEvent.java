@@ -1,10 +1,10 @@
 package com.linkedin_microservices.posts.service.events;
 
-import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
-@Builder
+@NoArgsConstructor
 public class PostLikedEvent {
     Long postId;
     Long creatorId;

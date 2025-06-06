@@ -22,4 +22,6 @@ public class ConnectionsController {
         List<Person> firstDegreeConnections = connectionsService.getFirstDegreeConnections();
         return ResponseEntity.ok(firstDegreeConnections);
     }
+
+
 }

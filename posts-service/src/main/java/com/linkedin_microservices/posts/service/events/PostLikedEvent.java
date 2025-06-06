@@ -1,4 +1,4 @@
-package com.linkedin_microservices.posts_service.events;
+package com.linkedin_microservices.posts.service.events;
 
 import lombok.Builder;
 import lombok.Data;
