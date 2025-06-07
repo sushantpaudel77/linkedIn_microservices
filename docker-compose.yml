@@ -1,4 +1,5 @@
 services:
+# This is global docker compose file you can use whatever you likes
   kafka:
     image: docker.io/bitnami/kafka:3.8
     container_name: kafka
@@ -17,6 +18,8 @@ services:
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       - KAFKA_KRAFT_CLUSTER_ID=MGY1YjJhMDk1YTk3  # you can replace with real base64 uuid
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_LOG_RETENTION_HOURS=168
 
   kafbat-ui:
     container_name: kafbat-ui
@@ -31,7 +34,6 @@ services:
       DYNAMIC_CONFIG_ENABLED: 'true'
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
-    restart: unless-stopped
 
   notification-db:
     image: postgres
@@ -78,7 +80,7 @@ services:
       - "7474:7474" # HTTP PORT
       - "7687:7687" # BOLT PORT
     volumes:
-      - connections-db-data:/var/neo4j/data
+      - connections-db-data:/data
     networks:
       - linkedin-network
 
@@ -135,6 +137,8 @@ services:
   api-gateway:
     image: sushantpaudel77/my_linkedin/api-gateway
     container_name: api-gateway
+    ports:
+      - "8080:8080"
     networks:
       - linkedin-network
     depends_on:
@@ -145,11 +149,10 @@ services:
 networks:
   linkedin-network:
 
-
 volumes:
   kafka_data:
   notification-db-data:
   posts-db-data:
-  user-db-data:
   connections-db-data:
+  user-db-data:
     driver: local
