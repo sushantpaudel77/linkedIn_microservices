@@ -18,6 +18,7 @@ public class ConnectionServiceConsumer {
     @KafkaListener(topics = "send-connection-request-topic")
     public void handleSendConnectionRequest(SendConnectionRequestEvent event) {
 
+        log.info("handle connections: handleSendConnectionRequest: {}", event);
         if (event == null || event.getSenderId() == null || event.getReceiverId() == null) {
             log.warn("Received an invalid connection request event: {}", event);
             return;
@@ -33,6 +34,7 @@ public class ConnectionServiceConsumer {
     @KafkaListener(topics = "accept-connection-request-topic")
     public void handleAcceptConnectionRequest(AcceptConnectionRequestEvent event) {
 
+        log.info("handle connections: handleAcceptConnectionRequest: {}", event);
         if (event == null || event.getSenderId() == null || event.getReceiverId() == null) {
             log.warn("Received invalid accept-connection-request event: {}", event);
             return;
