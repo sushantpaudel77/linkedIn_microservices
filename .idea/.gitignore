@@ -1,8 +1,38 @@
-# Default ignored files
-/shelf/
-/workspace.xml
+### IntelliJ IDEA ###
+.idea/
+*.iml
+*.iws
+workspace.xml
+shelf/
 
-# Environment-dependent path to Maven home directory
-/mavenHomeManager.xml
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
 
-/.env
+### Logs ###
+*.log
+logs/
+
+### Environment files ###
+.env
+.env.*
+
+### OS ###
+.DS_Store
+Thumbs.db
+
+### Docker ###
+*.pid
+docker-compose.override.yml
+
+### Others ###
+*.class
+*.jar
+*.war
+*.ear
