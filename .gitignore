@@ -1,0 +1,33 @@
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# Maven / Gradle build folders
+target/
+build/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment variables file
+.env
+
+# Docker
+**/docker-compose.override.yml
+**/docker-compose.override.yaml
+
+# Others you might add later
+*.class
+*.jar
+*.war
+
+# Temporary files
+*.tmp
+*.swp
+.env
