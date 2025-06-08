@@ -16,7 +16,7 @@ services:
     depends_on:
       - discovery-server
     environment:
-      - GITHUB_TOKEN=${GITHUB_TOKEN}  # ✅ Add this!
+      - GITHUB_TOKEN=${GITHUB_TOKEN}  
 
   connections-db:
     image: neo4j
@@ -35,10 +35,11 @@ services:
     image: sushantpaudel77/my_linkedin-notifications-service
     container_name: notification-service
     networks:
-      linkedin-network:
+      - linkedin-network
     depends_on:
       - discovery-server
       - notification-db
+      - config-server
 
   notification-db:
     image: postgres
@@ -60,6 +61,7 @@ services:
     depends_on:
       - discovery-server
       - connections-db
+      - config-server
 
   api-gateway:
     image: sushantpaudel77/my_linkedin-api-gateway
@@ -70,6 +72,7 @@ services:
       - linkedin-network
     depends_on:
       - discovery-server
+      - config-server
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
 

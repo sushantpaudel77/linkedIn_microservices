@@ -1,5 +1,15 @@
 services:
 
+  config-server:
+    image: sushantpaudel77/my_linkedin-config-server
+    container_name: config-server
+    networks:
+      - linkedin-network
+    depends_on:
+      - discovery-server
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+
   kafka:
     image: docker.io/bitnami/kafka:3.8
     container_name: kafka
@@ -144,6 +154,16 @@ services:
       - discovery-server
     environment:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - linkedin-network
+    depends_on:
+      - discovery-server
 
 networks:
   linkedin-network:
