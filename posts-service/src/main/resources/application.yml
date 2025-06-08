@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: post-service
+
+  config:
+    import: configserver:http://config-server:8888
+
+  profiles:
+    active: default
+
+  cloud:
+    config:
+      label: main
+
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
